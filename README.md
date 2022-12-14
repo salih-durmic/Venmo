@@ -16,7 +16,7 @@ You should attempt to complete all of the following required use cases.
    1. Logging in returns an Authentication Token. I need to include this token with all my subsequent interactions with the system outside of registering and logging in.
    2. The ability to log in has been provided in your starter code.
    3. User ids start at 1001.
-3. As a user, when I register a new account is created for me.
+3. **[COMPLETE]** As a user, when I register a new account is created for me.
    1. The new account has an initial balance of $1000.
    2. Account ids start at 2001.
 4. As an authenticated user of the system, I need to be able to see my Account Balance.
