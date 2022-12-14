@@ -5,9 +5,11 @@ import com.techelevator.tenmo.model.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
+@Component
 public class JdbcAccountDao implements AccountDao{
 
     private JdbcTemplate jdbcTemplate;
@@ -20,7 +22,7 @@ public class JdbcAccountDao implements AccountDao{
 
     public Account getAccount(String name){
         User user = userDao.findByUsername(name);
-        String sql = "SELECT user_id, account_id, balance FROM account WHERE username ILIKE ?;";
+        String sql = "SELECT account.user_id, account_id, balance FROM account JOIN tenmo_user ON account.user_id=tenmo_user.user_id WHERE tenmo_user.username ILIKE ?;";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, user.getUsername());
         if (rowSet.next()){
             return mapRowToAccount(rowSet);

@@ -26,7 +26,7 @@ public class AccountController {
     }
 
     @RequestMapping(value = "/balance", method = RequestMethod.GET)
-    //@PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public BigDecimal checkBalance(Principal principal){
         User user = userDao.findByUsername(principal.getName());
         Account account = accountDao.getAccount(user.getUsername());
