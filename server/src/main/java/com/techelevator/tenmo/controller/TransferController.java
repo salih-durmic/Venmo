@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 public class TransferController {
@@ -24,15 +25,22 @@ public class TransferController {
 
 
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @RequestMapping(value = "/transfer", method = RequestMethod.POST)
+    @RequestMapping(path = "/transfer", method = RequestMethod.POST)
     public void transfer(@Valid @RequestBody Transfer transfer) {
         if (!transferDao.sendMoney(transfer)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transfer failed.");
         }
     }
 
+    @RequestMapping(path = "/list", method = RequestMethod.GET)
+    public List<Transfer> listTransfers(@Valid @RequestBody Transfer transfer) {
+        return transferDao.listMyTransfers(transfer);
+    }
 
-
+    @RequestMapping(path = "/get", method = RequestMethod.GET)
+    public Transfer getById(@Valid @RequestBody int transferId) {
+        return transferDao.getTransferById(transferId);
+    }
 
 
 }
