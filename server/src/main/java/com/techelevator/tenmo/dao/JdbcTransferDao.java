@@ -22,14 +22,13 @@ public class JdbcTransferDao implements TransferDao{
     }
 
     public boolean sendMoney(Transfer transfer){
-        transfer = createNewTransferInDatabase(transfer);
         String sql = "BEGIN TRANSACTION; UPDATE account SET balance = balance - ? WHERE account_id = ?; " +
                 "UPDATE account SET balance = balance + ? WHERE account_id = ?; COMMIT;";
         BigDecimal amount = transfer.getAmount();
         String sql2 = "SELECT balance FROM account WHERE user_id = ?";
 
-        int senderId = getSenderUserId(transfer);
-        int receiverId = getReceiverUserId(transfer);
+        int senderId = transfer.getSenderId();
+        int receiverId = transfer.getReceiverId();
         SqlRowSet result = jdbcTemplate.queryForRowSet(sql2, senderId);
         BigDecimal balance = new BigDecimal(0);
         if (result.next()) {
@@ -44,6 +43,7 @@ public class JdbcTransferDao implements TransferDao{
 
         try {
             jdbcTemplate.update(sql, amount, senderId, amount, receiverId);
+            transfer = createNewTransferInDatabase(transfer);
             return true;
         } catch (Exception e) {
             return false;
