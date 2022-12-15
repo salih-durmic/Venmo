@@ -69,10 +69,11 @@ public class JdbcTransferDao implements TransferDao{
     public Transfer getTransferById(int transferId) {
         Transfer transfer = null;
         String sql = "SELECT * FROM transfer WHERE transfer_id = ?;";
-        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, transfer.getTransferId());
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, transferId);
         if (results.next()){
             transfer = mapRowToTransfer(results);
         }
+        transfer.setTransferId(transferId);
         return transfer;
 
     }
@@ -80,7 +81,6 @@ public class JdbcTransferDao implements TransferDao{
     public Transfer createNewTransferInDatabase(Transfer transfer){
         int senderUserId = getSenderUserId(transfer);
         int receiverUserId = getReceiverUserId(transfer);
-
         String sql = "INSERT INTO transfer (sender_id, receiver_id, amount) VALUES (?, ?, ?)  RETURNING transfer_id;";
         int newId = jdbcTemplate.queryForObject(sql, Integer.class, senderUserId, receiverUserId, transfer.getAmount());
         transfer.setTransferId(newId);
