@@ -1,0 +1,22 @@
+// Display list of names to user
+
+SELECT username
+FROM tenmo_user AS t
+JOIN account AS a ON t.user_id = a.user_id
+WHERE username != ?
+ORDER BY username ASC
+
+(? = principal.getName())
+
+//Send from one account to another
+
+BEGIN TRANSACTION;
+UPDATE account SET balance = balance - ? WHERE account_id = ?;   ?, ? = amount sent, sender_id
+UPDATE account SET balance = balance + ? WHERE account_id = ?;   ?, ? = amount received, receiver_id
+COMMIT;
+
+
+
+
+
+
