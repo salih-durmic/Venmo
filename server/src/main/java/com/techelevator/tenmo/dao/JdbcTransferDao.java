@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,13 +22,14 @@ public class JdbcTransferDao implements TransferDao{
     }
 
     public boolean sendMoney(Transfer transfer){
+        transfer = createNewTransferInDatabase(transfer);
         String sql = "BEGIN TRANSACTION; UPDATE account SET balance = balance - ? WHERE account_id = ?; " +
                 "UPDATE account SET balance = balance + ? WHERE account_id = ?; COMMIT;";
         BigDecimal amount = transfer.getAmount();
         String sql2 = "SELECT balance FROM account WHERE user_id = ?";
 
-        int senderId = transfer.getSenderId();
-        int receiverId = transfer.getReceiverId();
+        int senderId = getSenderUserId(transfer);
+        int receiverId = getReceiverUserId(transfer);
         SqlRowSet result = jdbcTemplate.queryForRowSet(sql2, senderId);
         BigDecimal balance = new BigDecimal(0);
         if (result.next()) {
@@ -48,13 +50,19 @@ public class JdbcTransferDao implements TransferDao{
         }
     }
 
-    public List<Transfer> listMyTransfers(Transfer transfer) {
+    public List<Transfer> listMyTransfers(Principal principal) {
         List<Transfer> transfers = new ArrayList<>();
-        String sql = "SELECT * FROM transfer WHERE sender_id = ? OR receiver_id = ?;";
-        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, transfer.getSenderId(), transfer.getReceiverId());
+        String sql = "SELECT transfer_id, sender_id, receiver_id, amount FROM transfer AS t JOIN tenmo_user AS u ON t.sender_id = u.user_id WHERE u.username = ?;";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, principal.getName());
         while(results.next()) {
             transfers.add(mapRowToTransfer(results));
         }
+        sql = "SELECT transfer_id, sender_id, receiver_id, amount FROM transfer AS t JOIN tenmo_user AS u ON t.receiver_id = u.user_id WHERE u.username = ?;";
+        results = jdbcTemplate.queryForRowSet(sql, principal.getName());
+        while(results.next()) {
+            transfers.add(mapRowToTransfer(results));
+        }
+
         return transfers;
     }
 
@@ -69,6 +77,35 @@ public class JdbcTransferDao implements TransferDao{
 
     }
 
+    public Transfer createNewTransferInDatabase(Transfer transfer){
+        int senderUserId = getSenderUserId(transfer);
+        int receiverUserId = getReceiverUserId(transfer);
+
+        String sql = "INSERT INTO transfer (sender_id, receiver_id, amount) VALUES (?, ?, ?)  RETURNING transfer_id;";
+        int newId = jdbcTemplate.queryForObject(sql, Integer.class, senderUserId, receiverUserId, transfer.getAmount());
+        transfer.setTransferId(newId);
+        return transfer;
+    }
+
+    private int getSenderUserId(Transfer transfer) {
+        int senderUserId = 0;
+        String sql = "SELECT a.user_id FROM account AS a JOIN tenmo_user AS t ON a.user_id = t.user_id WHERE account_id = ?";
+        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transfer.getSenderId());
+        while(result.next()) {
+            senderUserId = result.getInt("user_id");
+        }
+        return senderUserId;
+    }
+
+    private int getReceiverUserId(Transfer transfer) {
+        int receiverUserId = 0;
+        String sql = "SELECT a.user_id FROM account AS a JOIN tenmo_user AS t ON a.user_id = t.user_id WHERE account_id = ?";
+        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transfer.getReceiverId());
+        while (result.next()) {
+            receiverUserId = result.getInt("user_id");
+        }
+        return receiverUserId;
+    }
 
     public Transfer mapRowToTransfer(SqlRowSet rowSet){
         Transfer transfer = new Transfer();

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -33,8 +34,8 @@ public class TransferController {
     }
 
     @RequestMapping(path = "/list", method = RequestMethod.GET)
-    public List<Transfer> listTransfers(@Valid @RequestBody Transfer transfer) {
-        return transferDao.listMyTransfers(transfer);
+    public List<Transfer> listTransfers(Principal principal) {
+        return transferDao.listMyTransfers(principal);
     }
 
     @RequestMapping(path = "/get", method = RequestMethod.GET)
