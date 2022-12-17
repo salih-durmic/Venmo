@@ -96,7 +96,7 @@ public class JdbcTransferDao implements TransferDao{
         return transfer;
     }
 
-    private int getSenderUserId(Transfer transfer) {
+    public int getSenderUserId(Transfer transfer) {
         int senderUserId = 0;
         String sql = "SELECT a.user_id FROM account AS a JOIN tenmo_user AS t ON a.user_id = t.user_id WHERE account_id = ?";
         SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transfer.getSenderId());
