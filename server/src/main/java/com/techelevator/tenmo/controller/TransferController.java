@@ -29,7 +29,7 @@ public class TransferController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     @RequestMapping(path = "/transfer", method = RequestMethod.POST)
     public void transfer(@Valid @RequestBody Transfer transfer, Principal principal) {
-        if (!transferDao.sendMoney(transfer, principal)) {
+        if (!transferDao.sendMoney(transfer, principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transfer failed.");
         }
     }

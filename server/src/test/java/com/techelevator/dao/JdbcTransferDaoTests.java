@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.math.BigDecimal;
 import java.security.Principal;
 
 public class JdbcTransferDaoTests extends BaseDaoTests{
@@ -25,10 +26,21 @@ public class JdbcTransferDaoTests extends BaseDaoTests{
         Transfer transfer = new Transfer();
         transfer.setTransferId(3001);
         Transfer newTransfer = sut.getTransferById(3001);
-
         Assert.assertEquals(transfer.getTransferId(), newTransfer.getTransferId());
 
     }
+
+//    @Test public void sendMoneyTest(){
+//        Transfer transfer = new Transfer();
+//        transfer.setSenderId(2001);
+//        transfer.setReceiverId(2002);
+//        transfer.setAmount(new BigDecimal("10.0"));
+//        boolean actual = sut.sendMoney(transfer, "user1");
+//
+//        Assert.assertTrue(actual);
+//
+//
+//    }
 
 
 

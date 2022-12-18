@@ -21,14 +21,14 @@ public class JdbcTransferDao implements TransferDao{
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public boolean sendMoney(Transfer transfer, Principal principal){
+    public boolean sendMoney(Transfer transfer, String username){
         String sql = "BEGIN TRANSACTION; UPDATE account SET balance = balance - ? WHERE account_id = ?; " +
                 "UPDATE account SET balance = balance + ? WHERE account_id = ?; COMMIT;";
         BigDecimal amount = transfer.getAmount();
         String sql2 = "SELECT balance FROM account WHERE account_id = ?";
         int senderId = transfer.getSenderId();
-        String sql3 = "SELECT a.account_id FROM account AS a JOIN tenmo_user AS t ON a.user_id = t.user_id WHERE username = ?"; //ensures logged in user is making the transfer from their account
-        SqlRowSet result = jdbcTemplate.queryForRowSet(sql3, principal.getName());
+        String sql3 = "SELECT a.account_id FROM account AS a JOIN tenmo_user AS t ON a.user_id = t.user_id WHERE username = ?"; //ensures logged-in user is making the transfer from their account
+        SqlRowSet result = jdbcTemplate.queryForRowSet(sql3, username);
         while (result.next()) {
             int realSenderId = result.getInt("account_id");
             if (senderId != realSenderId) {
